@@ -24,5 +24,19 @@ pipeline {
       steps { sh './mvnw -B -ntp test' }
       post { always { junit 'target/surefire-reports/*.xml' } }
     }
+    stage('SonarQube Analysis') {
+      steps {
+        withCredentials([string(credentialsId: 'sonar-token', variable: 'SONAR_TOKEN')]) {
+          sh '''
+            ./mvnw -B -ntp org.sonarsource.scanner.maven:sonar-maven-plugin:sonar \
+              -Dsonar.projectKey=demo-app \
+              -Dsonar.projectName=demo-app \
+              -Dsonar.host.url=http://sonarqube:9000 \
+              -Dsonar.token=$SONAR_TOKEN \
+              -Dsonar.qualitygate.wait=true
+          '''
+        }
+      }
+    }
   }
 }
