@@ -6,6 +6,10 @@ pipeline {
     buildDiscarder(logRotator(numToKeepStr: '20'))
   }
   triggers { pollSCM('H/2 * * * *') }
+  environment {
+    REGISTRY = 'localhost:5001'
+    IMAGE    = "${REGISTRY}/demo-app"
+  }
 
   stages {
     stage('Checkout') {
@@ -36,6 +40,16 @@ pipeline {
               -Dsonar.qualitygate.wait=true
           '''
         }
+      }
+    }
+    stage('Docker Build') {
+      steps {
+        sh 'docker build --build-arg APP_VERSION=${SHORT_SHA} -t ${IMAGE}:${SHORT_SHA} .'
+      }
+    }
+    stage('Trivy Scan') {
+      steps {
+        sh 'trivy image --no-progress --exit-code 1 --severity HIGH,CRITICAL --ignore-unfixed ${IMAGE}:${SHORT_SHA}'
       }
     }
   }
