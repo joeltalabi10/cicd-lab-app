@@ -10,7 +10,7 @@ class GreetingServiceTest {
 
     @Test
     void greetsByName() {
-        assertEquals("Hello, Ana!", service.greet("Ana"));
+        assertEquals("Hi, Ana!", service.greet("Ana"));
     }
 
     @Test
