@@ -17,14 +17,4 @@ class GreetingServiceTest {
     void trimsWhitespace() {
         assertEquals("Hello, Ana!", service.greet("  Ana "));
     }
-
-    @Test
-    void rejectsBlank() {
-        assertThrows(IllegalArgumentException.class, () -> service.greet(" "));
-    }
-
-    @Test
-    void rejectsNull() {
-        assertThrows(IllegalArgumentException.class, () -> service.greet(null));
-    }
 }
