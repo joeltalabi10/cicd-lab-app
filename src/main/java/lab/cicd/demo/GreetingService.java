@@ -10,4 +10,14 @@ public class GreetingService {
         }
         return "Hello, " + name.trim() + "!";
     }
+
+    public String farewell(String name, boolean formal) {
+        if (name == null || name.isBlank()) {
+            return "Goodbye!";
+        }
+        if (formal) {
+            return "Farewell, " + name.trim() + ".";
+        }
+        return "Bye, " + name.trim() + "!";
+    }
 }
