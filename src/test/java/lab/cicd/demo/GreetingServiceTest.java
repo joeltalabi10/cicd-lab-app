@@ -27,4 +27,19 @@ class GreetingServiceTest {
     void rejectsNull() {
         assertThrows(IllegalArgumentException.class, () -> service.greet(null));
     }
+
+    @Test
+    void farewellWithoutNameIsGeneric() {
+        assertEquals("Goodbye!", service.farewell(" ", true));
+    }
+
+    @Test
+    void farewellFormal() {
+        assertEquals("Farewell, Ana.", service.farewell("Ana", true));
+    }
+
+    @Test
+    void farewellCasual() {
+        assertEquals("Bye, Ana!", service.farewell("Ana", false));
+    }
 }
