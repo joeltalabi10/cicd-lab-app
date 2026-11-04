@@ -52,5 +52,8 @@ pipeline {
         sh 'trivy image --no-progress --exit-code 1 --severity HIGH,CRITICAL --ignore-unfixed ${IMAGE}:${SHORT_SHA}'
       }
     }
+    stage('Push Image') {
+      steps { sh 'docker push ${IMAGE}:${SHORT_SHA}' }
+    }
   }
 }
