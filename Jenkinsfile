@@ -7,8 +7,9 @@ pipeline {
   }
   triggers { pollSCM('H/2 * * * *') }
   environment {
-    REGISTRY = 'localhost:5001'
-    IMAGE    = "${REGISTRY}/demo-app"
+    REGISTRY    = 'localhost:5001'
+    IMAGE       = "${REGISTRY}/demo-app"
+    GITOPS_REPO = 'github.com/joeltalabi10/cicd-lab-gitops.git'
   }
 
   stages {
@@ -54,6 +55,31 @@ pipeline {
     }
     stage('Push Image') {
       steps { sh 'docker push ${IMAGE}:${SHORT_SHA}' }
+    }
+    stage('Update GitOps Repo') {
+      steps {
+        withCredentials([usernamePassword(credentialsId: 'github-pat',
+                                          usernameVariable: 'GH_USER',
+                                          passwordVariable: 'GH_TOKEN')]) {
+          sh '''
+            set -e
+            rm -rf gitops
+            git clone https://${GH_USER}:${GH_TOKEN}@${GITOPS_REPO} gitops
+            cd gitops/apps/demo-app/overlays/dev
+            kustomize edit set image demo-app=${IMAGE}:${SHORT_SHA}
+            cd ../../../..
+            git config user.name  "jenkins"
+            git config user.email "jenkins@lab.local"
+            git add -A
+            if git diff --cached --quiet; then
+              echo "gitops already at ${SHORT_SHA}"
+            else
+              git commit -m "demo-app: deploy ${SHORT_SHA}"
+              git push origin HEAD:main
+            fi
+          '''
+        }
+      }
     }
   }
 }
