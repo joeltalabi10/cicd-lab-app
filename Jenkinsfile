@@ -81,5 +81,25 @@ pipeline {
         }
       }
     }
+    stage('Post-Deploy Validation') {
+      steps {
+        sh '''
+          APP_URL=http://host.docker.internal:8090
+          for i in $(seq 1 90); do
+            v=$(curl -fs ${APP_URL}/actuator/info | jq -r '.app.version // empty' || true)
+            if [ "$v" = "${SHORT_SHA}" ]; then
+              echo "Version ${v} is live"
+              curl -fs ${APP_URL}/actuator/health | jq -e '.status == "UP"'
+              curl -fs "${APP_URL}/greet?name=smoke" | grep -q "Hello, smoke!"
+              exit 0
+            fi
+            echo "Waiting for ${SHORT_SHA}, currently '${v}' (${i}/90)"
+            sleep 5
+          done
+          echo "Deployment did not converge within 7.5 minutes"
+          exit 1
+        '''
+      }
+    }
   }
 }
