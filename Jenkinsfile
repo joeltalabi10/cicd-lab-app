@@ -50,7 +50,7 @@ pipeline {
     }
     stage('Trivy Scan') {
       steps {
-        sh 'trivy image --no-progress --exit-code 1 --severity HIGH,CRITICAL --ignore-unfixed ${IMAGE}:${SHORT_SHA}'
+        sh 'trivy image --timeout 15m --skip-version-check --no-progress --exit-code 1 --severity HIGH,CRITICAL --ignore-unfixed ${IMAGE}:${SHORT_SHA}'
       }
     }
     stage('Push Image') {
